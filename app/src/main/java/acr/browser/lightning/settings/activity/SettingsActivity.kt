@@ -16,6 +16,7 @@ import acr.browser.lightning.settings.screens.DebugSettingsScreen
 import acr.browser.lightning.settings.screens.DisplaySettingsScreen
 import acr.browser.lightning.settings.screens.GeneralSettingsScreen
 import acr.browser.lightning.settings.screens.PrivacySettingsScreen
+import acr.browser.lightning.settings.screens.UserScriptsSettingsScreen
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -48,6 +49,7 @@ class SettingsActivity : ComponentActivity() {
     @Inject internal lateinit var displaySettingsScreen: DisplaySettingsScreen
     @Inject internal lateinit var generalSettingsScreen: GeneralSettingsScreen
     @Inject internal lateinit var privacySettingsScreen: PrivacySettingsScreen
+    @Inject internal lateinit var userScriptsSettingsScreen: UserScriptsSettingsScreen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         injector.inject(this)
@@ -105,6 +107,10 @@ class SettingsActivity : ComponentActivity() {
                         ) {
                             navigationState = SettingsNavigation.ROOT
                         }
+
+                        SettingsNavigation.USER_SCRIPTS -> UserScriptsSettingsScreen(
+                            userScriptsSettingsScreen
+                        ) { navigationState = SettingsNavigation.ROOT }
 
                         SettingsNavigation.ABOUT -> AboutSettingsScreen(aboutSettingsScreen) {
                             navigationState = SettingsNavigation.ROOT

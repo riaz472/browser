@@ -10,6 +10,7 @@ import acr.browser.lightning.extensions.resizeAndShow
 import acr.browser.lightning.js.TextReflow
 import acr.browser.lightning.log.Logger
 import acr.browser.lightning.preference.UserPreferencesDataStore
+import acr.browser.lightning.preference.UserScriptsPreferenceManager
 import acr.browser.lightning.preference.datastore.getUnsafe
 import acr.browser.lightning.ssl.SslState
 import acr.browser.lightning.ssl.SslWarningPreferences
@@ -50,6 +51,7 @@ class TabWebViewClient @AssistedInject constructor(
     private val sslWarningPreferences: SslWarningPreferences,
     private val textReflow: TextReflow,
     private val logger: Logger,
+    private val userScriptsPreferenceManager: UserScriptsPreferenceManager,
     @Assisted("cache") private val cacheStoragePathHandler: InternalStoragePathHandler,
     @Assisted("files") private val filesStoragePathHandler: InternalStoragePathHandler,
     @Assisted private val tabCoroutineScope: TabCoroutineScope
@@ -153,6 +155,40 @@ class TabWebViewClient @AssistedInject constructor(
                 }
             }
         })
+        injectUserScripts(view)
+    }
+
+    /**
+     * Injects the user's custom CSS (wrapped in a JS style-element injection)
+     * and custom JavaScript into the current page via [WebView.evaluateJavascript].
+     */
+    private fun injectUserScripts(view: WebView) {
+        val css = userScriptsPreferenceManager.getCustomCss()
+        val js = userScriptsPreferenceManager.getCustomJs()
+        if (css.isNotBlank()) {
+            view.evaluateJavascript(buildCssInjectionJs(css), null)
+        }
+        if (js.isNotBlank()) {
+            view.evaluateJavascript(js, null)
+        }
+    }
+
+    /**
+     * Wraps [css] in a JavaScript snippet that creates a `<style>` element and
+     * appends it to the document's `<head>`, making the styles safe to inject
+     * via [WebView.evaluateJavascript].
+     */
+    private fun buildCssInjectionJs(css: String): String {
+        val escaped = css
+            .replace("\\", "\\\\")
+            .replace("'", "\\'")
+            .replace("\r\n", "\\n")
+            .replace("\n", "\\n")
+        return "(function(){" +
+            "var s=document.createElement('style');" +
+            "s.textContent='$escaped';" +
+            "(document.head||document.documentElement).appendChild(s);" +
+            "})();"
     }
 
 
