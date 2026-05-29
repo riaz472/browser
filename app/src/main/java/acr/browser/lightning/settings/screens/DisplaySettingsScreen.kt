@@ -4,6 +4,7 @@ import acr.browser.lightning.AppTheme
 import acr.browser.lightning.R
 import acr.browser.lightning.browser.ui.TabConfiguration
 import acr.browser.lightning.preference.UserPreferencesDataStore
+import acr.browser.lightning.preference.WallpaperPreferenceManager
 import acr.browser.lightning.resources.ResourceProvider
 import acr.browser.lightning.settings.SettingsBottomSheetChooserState
 import acr.browser.lightning.settings.SettingsSnackBarState
@@ -13,13 +14,18 @@ import acr.browser.lightning.settings.framework.SettingsFrameworkPresenter
 import acr.browser.lightning.settings.framework.SettingsFrameworkScreen
 import acr.browser.lightning.settings.framework.SettingsFrameworkState
 import acr.browser.lightning.settings.framework.ToggleState
+import android.app.Application
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class DisplaySettingsScreen @Inject constructor(
     private val resourceProvider: ResourceProvider,
-    private val userPreferencesDataStore: UserPreferencesDataStore
+    private val userPreferencesDataStore: UserPreferencesDataStore,
+    private val application: Application,
+    private val wallpaperPreferenceManager: WallpaperPreferenceManager
 ) {
     val key = "display"
 
@@ -135,6 +141,46 @@ class DisplaySettingsScreen @Inject constructor(
                         }
                     }
                 )
+            ),
+            ClickableState(
+                title = resourceProvider.stringResource(R.string.setting_choose_wallpaper),
+                summary = {
+                    if (wallpaperPreferenceManager.getWallpaperPath() != null) {
+                        "Wallpaper is set — tap to change"
+                    } else {
+                        resourceProvider.stringResource(R.string.setting_wallpaper_hint)
+                    }
+                },
+                onClick = ClickableOnClick.FileChooser(
+                    mimeType = "image/*",
+                    onSelected = { uri ->
+                        if (uri != null) {
+                            val destFile = wallpaperPreferenceManager.getWallpaperFile()
+                            withContext(Dispatchers.IO) {
+                                application.contentResolver.openInputStream(uri)?.use { input ->
+                                    destFile.outputStream().use { output ->
+                                        input.copyTo(output)
+                                    }
+                                }
+                            }
+                            wallpaperPreferenceManager.saveWallpaperPath(destFile.absolutePath)
+                            ClickableOnClick.Snackbar {
+                                SettingsSnackBarState(
+                                    message = resourceProvider.stringResource(R.string.setting_wallpaper_set)
+                                )
+                            }
+                        } else {
+                            ClickableOnClick.Action {}
+                        }
+                    }
+                )
+            ),
+            ClickableState(
+                title = resourceProvider.stringResource(R.string.setting_remove_wallpaper),
+                enabled = { wallpaperPreferenceManager.getWallpaperPath() != null },
+                onClick = ClickableOnClick.Action {
+                    wallpaperPreferenceManager.clearWallpaper()
+                }
             ),
             // TODO: Text size
         )

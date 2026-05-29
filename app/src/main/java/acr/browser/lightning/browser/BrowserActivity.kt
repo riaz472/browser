@@ -47,12 +47,15 @@ import acr.browser.lightning.extensions.drawable
 import acr.browser.lightning.extensions.resizeAndShow
 import acr.browser.lightning.extensions.takeIfInstance
 import acr.browser.lightning.extensions.tint
+import acr.browser.lightning.preference.WallpaperPreferenceManager
 import acr.browser.lightning.preference.datastore.getUnsafe
 import acr.browser.lightning.search.SuggestionsAdapter
 import acr.browser.lightning.ssl.createSslDrawableForState
 import acr.browser.lightning.utils.value
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.view.Gravity
@@ -67,12 +70,17 @@ import android.widget.AdapterView
 import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import androidx.annotation.DrawableRes
 import androidx.annotation.MenuRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -115,6 +123,9 @@ abstract class BrowserActivity : ThemableBrowserActivity() {
 
     @Inject
     internal lateinit var menuItemAdapter: MenuItemAdapter
+
+    @Inject
+    internal lateinit var wallpaperPreferenceManager: WallpaperPreferenceManager
 
     @Inject
     internal lateinit var inputMethodManager: InputMethodManager
@@ -375,6 +386,11 @@ abstract class BrowserActivity : ThemableBrowserActivity() {
     override fun onPause() {
         super.onPause()
         presenter.onViewHidden()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        applyWallpaper()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -825,6 +841,31 @@ abstract class BrowserActivity : ThemableBrowserActivity() {
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
             decor.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        }
+    }
+
+    /**
+     * Loads the user-chosen wallpaper from internal storage and applies it to the
+     * DrawerLayout background. Runs image decoding off the main thread.
+     * Clears the background (and the saved pref) if the file is missing.
+     */
+    private fun applyWallpaper() {
+        val path = wallpaperPreferenceManager.getWallpaperPath()
+        if (path == null) {
+            binding.drawerLayout.background = null
+            return
+        }
+        val file = File(path)
+        if (!file.exists()) {
+            wallpaperPreferenceManager.clearWallpaper()
+            binding.drawerLayout.background = null
+            return
+        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath) ?: return@launch
+            withContext(Dispatchers.Main) {
+                binding.drawerLayout.background = BitmapDrawable(resources, bitmap)
+            }
         }
     }
 

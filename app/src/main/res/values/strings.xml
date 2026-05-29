@@ -346,4 +346,10 @@
 
     <!-- Search -->
     <string name="search_insert_suggestion">Insert suggestion</string>
+
+    <!-- Wallpaper settings -->
+    <string name="setting_choose_wallpaper">Choose Wallpaper</string>
+    <string name="setting_wallpaper_hint">Tap to pick an image from your gallery</string>
+    <string name="setting_remove_wallpaper">Remove Wallpaper</string>
+    <string name="setting_wallpaper_set">Wallpaper set. Reopen the browser to apply.</string>
 </resources>
