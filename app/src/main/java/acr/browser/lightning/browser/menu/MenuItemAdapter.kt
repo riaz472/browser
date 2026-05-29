@@ -28,8 +28,13 @@ class MenuItemAdapter @Inject constructor() {
             R.id.action_downloads -> MenuSelection.DOWNLOADS
             R.id.action_add_bookmark -> MenuSelection.ADD_BOOKMARK
             R.id.action_find -> MenuSelection.FIND
+            // New menu items for Nexus Browser custom screens
+            R.id.nav_privacy -> MenuSelection.PRIVACY_POLICY
+            R.id.nav_terms -> MenuSelection.TERMS_OF_SERVICE
+            R.id.nav_contact -> MenuSelection.CONTACT_US
+            R.id.nav_support -> MenuSelection.SUPPORT
+            R.id.nav_feedback -> MenuSelection.FEEDBACK
             else -> null
         }
     }
-
 }
