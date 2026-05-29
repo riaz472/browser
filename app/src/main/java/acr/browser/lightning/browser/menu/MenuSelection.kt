@@ -16,5 +16,10 @@ enum class MenuSelection {
     ADD_BOOKMARK,
     SETTINGS,
     BACK,
-    FORWARD
+    FORWARD,
+    PRIVACY_POLICY,
+    TERMS_OF_SERVICE,
+    CONTACT_US,
+    SUPPORT,
+    FEEDBACK
 }
