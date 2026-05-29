@@ -4,25 +4,37 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Contact Us"
         android:textSize="24sp"
         android:textStyle="bold" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Developer: Riaz Ali Shahani"
         android:padding="8dp" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Email: riazalishahani485@gmail.com"
         android:padding="8dp" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="WhatsApp: +923301458939"
         android:padding="8dp" />
+
+    <Button
+        android:id="@+id/contact_email_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Send Email" />
+
 </LinearLayout>
