@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import acr.browser.lightning.R
 
@@ -28,6 +29,17 @@ class ContactActivity : AppCompatActivity() {
                 startActivity(
                     Intent(Intent.ACTION_VIEW, Uri.parse("mailto:riazalishahani485@gmail.com"))
                 )
+            }
+        }
+
+        findViewById<Button>(R.id.contact_whatsapp_button).setOnClickListener {
+            val phone = "923301458939"
+            val whatsappIntent = Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://wa.me/$phone?text=Hi%2C%20I%20have%20a%20query%20about%20Nexus%20Browser"))
+            if (whatsappIntent.resolveActivity(packageManager) != null) {
+                startActivity(whatsappIntent)
+            } else {
+                Toast.makeText(this, "WhatsApp is not installed", Toast.LENGTH_SHORT).show()
             }
         }
     }

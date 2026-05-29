@@ -37,4 +37,11 @@
         android:layout_marginTop="16dp"
         android:text="Send Email" />
 
+    <Button
+        android:id="@+id/contact_whatsapp_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Chat on WhatsApp" />
+
 </LinearLayout>
