@@ -37,6 +37,11 @@ import acr.browser.lightning.html.bookmark.BookmarkPageFactory
 import acr.browser.lightning.html.history.HistoryPageFactory
 import acr.browser.lightning.search.SearchEngineProvider
 import acr.browser.lightning.ssl.SslState
+import acr.browser.lightning.ui.ContactActivity
+import acr.browser.lightning.ui.FeedbackActivity
+import acr.browser.lightning.ui.PrivacyActivity
+import acr.browser.lightning.ui.SupportActivity
+import acr.browser.lightning.ui.TermsActivity
 import acr.browser.lightning.utils.Option
 import acr.browser.lightning.utils.QUERY_PLACE_HOLDER
 import acr.browser.lightning.utils.isBookmarkUrl
@@ -44,6 +49,7 @@ import acr.browser.lightning.utils.isDownloadsUrl
 import acr.browser.lightning.utils.isHistoryUrl
 import acr.browser.lightning.utils.isSpecialUrl
 import acr.browser.lightning.utils.smartUrlFilter
+import android.content.Intent
 import androidx.activity.result.ActivityResult
 import androidx.core.net.toUri
 import kotlinx.coroutines.CoroutineScope
@@ -120,9 +126,6 @@ class BrowserPresenter @Inject constructor(
     private val tabJobs: MutableList<Job> = mutableListOf()
     private val allTabsJobs: MutableList<Job> = mutableListOf()
 
-    /**
-     * Call when the view is attached to the presenter.
-     */
     fun onViewAttached(view: BrowserContract.View) {
         this.view = view
         view.updateState(viewState)
@@ -130,10 +133,8 @@ class BrowserPresenter @Inject constructor(
         currentFolder = Bookmark.Folder.Root
         browserCoroutineScope.launch {
             cookieAdministrator.adjustCookieSettings()
-
             val bookmarks = bookmarkRepository.bookmarksAndFolders(folder = Bookmark.Folder.Root)
             view.updateState(viewState.copy(bookmarks = bookmarks, isRootFolder = true))
-
             val tabs = model.initializeTabs()
             val lastTab = if (tabs.isEmpty()) {
                 model.createTab(homePageInitializer)
@@ -146,30 +147,21 @@ class BrowserPresenter @Inject constructor(
         browserCoroutineScope.launch {
             model.tabsListChanges().collectLatest { list ->
                 this@BrowserPresenter.view?.updateTabs(list.map { it.asViewState() })
-
                 allTabsJobs.forEach { it.cancel() }
                 allTabsJobs.clear()
                 list.subscribeToUpdates(allTabsJobs)
-
                 tabCountNotifier.notifyTabCountChange(list.size)
             }
         }
     }
 
-    /**
-     * Call when the view is detached from the presenter.
-     */
     fun onViewDetached() {
         view = null
-
         tabJobs.forEach { it.cancel() }
         allTabsJobs.forEach { it.cancel() }
         browserCoroutineScope.cancel()
     }
 
-    /**
-     * Call when the view is hidden (i.e. the browser is sent to the background).
-     */
     fun onViewHidden() {
         model.markAllNonEphemeral()
         browserCoroutineScope.launch {
@@ -272,7 +264,6 @@ class BrowserPresenter @Inject constructor(
             }
         }
 
-
         tabJobs += browserCoroutineScope.launch {
             tab.downloadRequests().collectLatest {
                 navigator.download(it)
@@ -354,9 +345,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when a new action is triggered, such as the user opening a new URL in the browser.
-     */
     fun onNewAction(action: BrowserContract.Action) {
         when (action) {
             is BrowserContract.Action.LoadUrl -> if (action.url.isSpecialUrl()) {
@@ -369,16 +357,10 @@ class BrowserPresenter @Inject constructor(
                     tabType = TabModel.Type.EPHEMERAL
                 )
             }
-
             BrowserContract.Action.Panic -> panicClean()
         }
     }
 
-    /**
-     * Call when the user confirms that they do or do not want to allow a local file to be opened
-     * in the browser. This is a security gate to prevent malicious local files from being opened
-     * in the browser without the user's knowledge.
-     */
     fun onConfirmOpenLocalFile(allow: Boolean) {
         if (allow) {
             pendingAction?.let {
@@ -398,20 +380,12 @@ class BrowserPresenter @Inject constructor(
         browserCoroutineScope.launch {
             model.clean()
             historyPageFactory.deleteHistoryPage()
-
             model.deleteAllTabs()
             navigator.closeBrowser()
-
-            // System exit needed in the case of receiving
-            // the panic intent since finish() isn't completely
-            // closing the browser
             exitProcess(1)
         }
     }
 
-    /**
-     * Call when the user selects an option from the menu.
-     */
     fun onMenuClick(menuSelection: MenuSelection) {
         when (menuSelection) {
             MenuSelection.NEW_TAB -> onNewTabClick()
@@ -419,31 +393,56 @@ class BrowserPresenter @Inject constructor(
             MenuSelection.SHARE -> currentTab?.url?.takeIf { !it.isSpecialUrl() }?.let {
                 navigator.sharePage(url = it, title = currentTab?.title)
             }
-
             MenuSelection.HISTORY -> createNewTabAndSelect(
                 historyPageInitializer,
                 shouldSelect = true
             )
-
             MenuSelection.DOWNLOADS -> createNewTabAndSelect(
                 downloadPageInitializer,
                 shouldSelect = true
             )
-
             MenuSelection.FIND -> view?.showFindInPageDialog()
             MenuSelection.COPY_LINK -> currentTab?.url?.takeIf { !it.isSpecialUrl() }
                 ?.let(navigator::copyPageLink)
-
             MenuSelection.ADD_TO_HOME -> currentTab?.url?.takeIf { !it.isSpecialUrl() }
                 ?.let { addToHomeScreen() }
-
             MenuSelection.BOOKMARKS -> view?.openBookmarkDrawer()
             MenuSelection.ADD_BOOKMARK -> currentTab?.url?.takeIf { !it.isSpecialUrl() }
                 ?.let { showAddBookmarkDialog() }
-
             MenuSelection.SETTINGS -> navigator.openSettings()
             MenuSelection.BACK -> onBackClick()
             MenuSelection.FORWARD -> onForwardClick()
+            // === NEXUS BROWSER CUSTOM SCREENS ===
+            MenuSelection.PRIVACY_POLICY -> {
+                view?.let {
+                    val intent = Intent(it.getContext(), PrivacyActivity::class.java)
+                    it.startActivity(intent)
+                }
+            }
+            MenuSelection.TERMS_OF_SERVICE -> {
+                view?.let {
+                    val intent = Intent(it.getContext(), TermsActivity::class.java)
+                    it.startActivity(intent)
+                }
+            }
+            MenuSelection.CONTACT_US -> {
+                view?.let {
+                    val intent = Intent(it.getContext(), ContactActivity::class.java)
+                    it.startActivity(intent)
+                }
+            }
+            MenuSelection.SUPPORT -> {
+                view?.let {
+                    val intent = Intent(it.getContext(), SupportActivity::class.java)
+                    it.startActivity(intent)
+                }
+            }
+            MenuSelection.FEEDBACK -> {
+                view?.let {
+                    val intent = Intent(it.getContext(), FeedbackActivity::class.java)
+                    it.startActivity(intent)
+                }
+            }
         }
     }
 
@@ -471,9 +470,6 @@ class BrowserPresenter @Inject constructor(
 
     private fun List<TabViewState>.indexOfCurrentTab(): Int = tabIndexForId(currentTab?.id)
 
-    /**
-     * Call when the user selects a combination of keys to perform a shortcut.
-     */
     fun onKeyComboClick(keyCombo: KeyCombo) {
         when (keyCombo) {
             KeyCombo.CTRL_F -> view?.showFindInPageDialog()
@@ -497,16 +493,10 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user selects a tab to switch to at the provided [index].
-     */
     fun onTabClick(index: Int) {
         selectTab(model.selectTab(tabListState[index].id))
     }
 
-    /**
-     * Call when the user long presses on a tab at the provided [index].
-     */
     fun onTabLongClick(index: Int) {
         view?.showCloseBrowserDialog(tabListState[index].id)
     }
@@ -524,13 +514,8 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user clicks on the close button for the tab at the provided [index]
-     */
     fun onTabClose(index: Int) {
         if (index == -1) {
-            // If the user clicks on close multiple times, the index may be -1 if the view is in the
-            // process of being removed.
             return
         }
         val nextTab = tabListState.nextSelected(index)
@@ -555,42 +540,26 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the tab drawer is opened or closed.
-     *
-     * @param isOpen True if the drawer is now open, false if it is now closed.
-     */
     fun onTabDrawerMoved(isOpen: Boolean) {
         isTabDrawerOpen = isOpen
     }
 
-    /**
-     * Call when the bookmark drawer is opened or closed.
-     *
-     * @param isOpen True if the drawer is now open, false if it is now closed.
-     */
     fun onBookmarkDrawerMoved(isOpen: Boolean) {
         isBookmarkDrawerOpen = isOpen
     }
 
-    /**
-     * Called when the user clicks on the device back button or swipes to go back. Differentiated
-     * from [onBackClick] which is called when the user presses the browser's back button.
-     */
     fun onNavigateBack() {
         when {
             isCustomViewShowing -> {
                 view?.hideCustomView()
                 currentTab?.hideCustomView()
             }
-
             isTabDrawerOpen -> view?.closeTabDrawer()
             isBookmarkDrawerOpen -> if (currentFolder != Bookmark.Folder.Root) {
                 onBookmarkMenuClick()
             } else {
                 view?.closeBookmarkDrawer()
             }
-
             currentTab?.canGoBack() == true -> currentTab?.goBack()
             currentTab?.canGoBack() == false -> if (incognitoMode) {
                 currentTab?.id?.let {
@@ -608,42 +577,26 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Called when the user presses the browser's back button.
-     */
     fun onBackClick() {
         if (currentTab?.canGoBack() == true) {
             currentTab?.goBack()
         }
     }
 
-    /**
-     * Called when the user presses the browser's forward button.
-     */
     fun onForwardClick() {
         if (currentTab?.canGoForward() == true) {
             currentTab?.goForward()
         }
     }
 
-    /**
-     * Call when the user clicks on the home button.
-     */
     fun onHomeClick() {
         currentTab?.loadFromInitializer(homePageInitializer)
     }
 
-    /**
-     * Call when the user clicks on the open new tab button.
-     */
     fun onNewTabClick() {
         createNewTabAndSelect(homePageInitializer, shouldSelect = true)
     }
 
-    /**
-     * Call when the user long clicks on the new tab button, indicating that they want to re-open
-     * the last closed tab.
-     */
     fun onNewTabLongClick() {
         browserCoroutineScope.launch {
             val tab = model.reopenTab()
@@ -653,10 +606,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user clicks on the refresh (or stop/delete) button that is located in the
-     * search bar.
-     */
     fun onRefreshOrStopClick() {
         if (isSearchViewFocused) {
             view?.renderState(viewState.copy(displayUrl = ""))
@@ -678,13 +627,10 @@ class BrowserPresenter @Inject constructor(
                         bookmarkPageFactory.buildPage()
                         currentTab?.reload()
                     }
-
                 currentUrl.isDownloadsUrl() ->
                     currentTab?.loadFromInitializer(downloadPageInitializer)
-
                 currentUrl.isHistoryUrl() ->
                     currentTab?.loadFromInitializer(historyPageInitializer)
-
                 else -> currentTab?.reload()
             }
         } else {
@@ -692,11 +638,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the focus state changes for the search bar.
-     *
-     * @param isFocused True if the view is now focused, false otherwise.
-     */
     fun onSearchFocusChanged(isFocused: Boolean) {
         isSearchViewFocused = isFocused
         if (isFocused) {
@@ -722,10 +663,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user submits a search [query] to the search bar. At this point the user has
-     * provided intent to search and is no longer trying to manipulate the query.
-     */
     fun onSearch(query: String) {
         if (query.isEmpty()) {
             return
@@ -745,70 +682,46 @@ class BrowserPresenter @Inject constructor(
         currentTab?.loadUrl(url)
     }
 
-    /**
-     * Call when the user enters a [query] to look for in the current web page.
-     */
     fun onFindInPage(query: String) {
         currentTab?.find(query)
         view?.updateState(viewState.copy(findInPage = query))
     }
 
-    /**
-     * Call when the user selects to move to the next highlighted word in the web page.
-     */
     fun onFindNext() {
         currentTab?.findNext()
     }
 
-    /**
-     * Call when the user selects to move to the previous highlighted word in the web page.
-     */
     fun onFindPrevious() {
         currentTab?.findPrevious()
     }
 
-    /**
-     * Call when the user chooses to dismiss the find in page UI component.
-     */
     fun onFindDismiss() {
         currentTab?.clearFindMatches()
         view?.updateState(viewState.copy(findInPage = ""))
     }
 
-    /**
-     * Call when the user selects a search suggestion that was suggested by the search box.
-     */
     fun onSearchSuggestionClicked(webPage: WebPage) {
         val url = when (webPage) {
             is HistoryEntry,
             is Bookmark.Entry -> webPage.url
-
             is SearchSuggestion -> webPage.title
             else -> null
         } ?: error("Other types cannot be search suggestions: $webPage")
-
         onSearch(url)
     }
 
-    /**
-     * Call when the user clicks on the SSL icon in the search box.
-     */
     fun onSslIconClick() {
         currentTab?.sslCertificateInfo?.let {
             view?.showSslDialog(it)
         }
     }
 
-    /**
-     * Call when the user clicks on a bookmark from the bookmark list at the provided [index].
-     */
     fun onBookmarkClick(index: Int) {
         when (val bookmark = viewState.bookmarks[index]) {
             is Bookmark.Entry -> {
                 currentTab?.loadUrl(bookmark.url)
                 view?.closeBookmarkDrawer()
             }
-
             Bookmark.Folder.Root -> error("Cannot click on root folder")
             is Bookmark.Folder.Entry -> {
                 currentFolder = bookmark
@@ -829,20 +742,14 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user long presses on a bookmark in the bookmark list at the provided [index].
-     */
     fun onBookmarkLongClick(index: Int) {
         when (val item = viewState.bookmarks[index]) {
             is Bookmark.Entry -> view?.showBookmarkOptionsDialog(item)
             is Bookmark.Folder.Entry -> view?.showFolderOptionsDialog(item)
-            Bookmark.Folder.Root -> Unit // Root is not clickable
+            Bookmark.Folder.Root -> Unit
         }
     }
 
-    /**
-     * Call when the user clicks on the page tools button.
-     */
     fun onToolsClick() {
         val currentUrl = currentTab?.url ?: return
         view?.showToolsDialog(
@@ -851,9 +758,6 @@ class BrowserPresenter @Inject constructor(
         )
     }
 
-    /**
-     * Call when the user chooses to toggle the desktop user agent on/off.
-     */
     fun onToggleDesktopAgent() {
         browserCoroutineScope.launch {
             currentTab?.toggleDesktopAgent()
@@ -861,9 +765,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user chooses to toggle ad blocking on/off for the current web page.
-     */
     fun onToggleAdBlocking() {
         val currentUrl = currentTab?.url ?: return
         if (allowListModel.isUrlAllowedAds(currentUrl)) {
@@ -874,10 +775,6 @@ class BrowserPresenter @Inject constructor(
         currentTab?.reload()
     }
 
-    /**
-     * Call when the user clicks on the star icon to add a bookmark for the current page or remove
-     * the existing one.
-     */
     fun onStarClick() {
         val url = currentTab?.url ?: return
         val title = currentTab?.title.orEmpty()
@@ -914,13 +811,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user confirms the details for adding a bookmark.
-     *
-     * @param title The title of the bookmark.
-     * @param url The URL of the bookmark.
-     * @param folder The name of the folder the bookmark is in.
-     */
     fun onBookmarkConfirmed(title: String, url: String, folder: String) {
         browserCoroutineScope.launch {
             bookmarkRepository.addBookmarkIfNotExists(
@@ -936,13 +826,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user confirms the details when editing a bookmark.
-     *
-     * @param title The title of the bookmark.
-     * @param url The URL of the bookmark.
-     * @param folder The name of the folder the bookmark is in.
-     */
     fun onBookmarkEditConfirmed(title: String, url: String, folder: String) {
         browserCoroutineScope.launch {
             bookmarkRepository.editBookmark(
@@ -967,12 +850,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user confirms a name change to an existing folder.
-     *
-     * @param oldTitle The previous title of the folder.
-     * @param newTitle The new title of the folder.
-     */
     fun onBookmarkFolderRenameConfirmed(oldTitle: String, newTitle: String) {
         browserCoroutineScope.launch {
             bookmarkRepository.renameFolder(oldTitle, newTitle)
@@ -984,9 +861,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user clicks on a menu [option] for the provided [bookmark].
-     */
     fun onBookmarkOptionClick(
         bookmark: Bookmark.Entry,
         option: BrowserContract.BookmarkOptionEvent
@@ -994,17 +868,13 @@ class BrowserPresenter @Inject constructor(
         when (option) {
             BrowserContract.BookmarkOptionEvent.NEW_TAB ->
                 createNewTabAndSelect(UrlInitializer(bookmark.url), shouldSelect = true)
-
             BrowserContract.BookmarkOptionEvent.BACKGROUND_TAB ->
                 createNewTabAndSelect(UrlInitializer(bookmark.url), shouldSelect = false)
-
             BrowserContract.BookmarkOptionEvent.INCOGNITO_TAB -> navigator.launchIncognito(bookmark.url)
             BrowserContract.BookmarkOptionEvent.SHARE ->
                 navigator.sharePage(url = bookmark.url, title = bookmark.title)
-
             BrowserContract.BookmarkOptionEvent.COPY_LINK ->
                 navigator.copyPageLink(bookmark.url)
-
             BrowserContract.BookmarkOptionEvent.REMOVE ->
                 browserCoroutineScope.launch {
                     bookmarkRepository.deleteBookmark(bookmark)
@@ -1014,7 +884,6 @@ class BrowserPresenter @Inject constructor(
                         reload()
                     }
                 }
-
             BrowserContract.BookmarkOptionEvent.EDIT ->
                 browserCoroutineScope.launch {
                     val folders = bookmarkRepository.getFolderNames()
@@ -1028,9 +897,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user clicks on a menu [option] for the provided [folder].
-     */
     fun onFolderOptionClick(folder: Bookmark.Folder, option: BrowserContract.FolderOptionEvent) {
         when (option) {
             BrowserContract.FolderOptionEvent.RENAME -> view?.showEditFolderDialog(folder.title)
@@ -1047,9 +913,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user clicks on a menu [option] for the provided [download] entry.
-     */
     fun onDownloadOptionClick(
         download: DownloadEntry,
         option: BrowserContract.DownloadOptionEvent
@@ -1062,7 +925,6 @@ class BrowserPresenter @Inject constructor(
                         reload()
                     }
                 }
-
             BrowserContract.DownloadOptionEvent.DELETE_ALL ->
                 browserCoroutineScope.launch {
                     downloadsRepository.deleteDownload(download.url)
@@ -1073,9 +935,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user clicks on a menu [option] for the provided [historyEntry].
-     */
     fun onHistoryOptionClick(
         historyEntry: HistoryEntry,
         option: BrowserContract.HistoryOptionEvent
@@ -1083,16 +942,12 @@ class BrowserPresenter @Inject constructor(
         when (option) {
             BrowserContract.HistoryOptionEvent.NEW_TAB ->
                 createNewTabAndSelect(UrlInitializer(historyEntry.url), shouldSelect = true)
-
             BrowserContract.HistoryOptionEvent.BACKGROUND_TAB ->
                 createNewTabAndSelect(UrlInitializer(historyEntry.url), shouldSelect = false)
-
             BrowserContract.HistoryOptionEvent.INCOGNITO_TAB ->
                 navigator.launchIncognito(historyEntry.url)
-
             BrowserContract.HistoryOptionEvent.SHARE ->
                 navigator.sharePage(url = historyEntry.url, title = historyEntry.title)
-
             BrowserContract.HistoryOptionEvent.COPY_LINK -> navigator.copyPageLink(historyEntry.url)
             BrowserContract.HistoryOptionEvent.REMOVE ->
                 browserCoroutineScope.launch {
@@ -1104,10 +959,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user clicks on the tab count button (or home button in desktop mode, or
-     * incognito icon in incognito mode).
-     */
     fun onTabCountViewClick() {
         if (uiConfiguration.tabConfiguration == TabConfiguration.DRAWER_SIDE) {
             view?.openTabDrawer()
@@ -1122,33 +973,22 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user clicks on the tab menu located in the tab drawer.
-     */
     fun onTabMenuClick() {
         currentTab?.let {
             view?.showCloseBrowserDialog(it.id)
         }
     }
 
-    /**
-     * Call when the user clicks on the bookmark menu (star or back arrow) located in the bookmark
-     * drawer.
-     */
     fun onBookmarkMenuClick() {
         if (currentFolder != Bookmark.Folder.Root) {
             currentFolder = Bookmark.Folder.Root
             browserCoroutineScope.launch {
-                val bookmarks =
-                    bookmarkRepository.bookmarksAndFolders(folder = Bookmark.Folder.Root)
+                val bookmarks = bookmarkRepository.bookmarksAndFolders(folder = Bookmark.Folder.Root)
                 view?.updateState(viewState.copy(bookmarks = bookmarks, isRootFolder = true))
             }
         }
     }
 
-    /**
-     * Call when the user long presses anywhere on the web page with the provided tab [id].
-     */
     fun onPageLongPress(id: Int, longPress: LongPress) {
         val pageUrl = model.tabsList.find { it.id == id }?.url
         if (pageUrl?.isSpecialUrl() == true) {
@@ -1190,20 +1030,15 @@ class BrowserPresenter @Inject constructor(
             when (longPress.hitCategory) {
                 LongPress.Category.IMAGE -> view?.showImageLongPressDialog(longPress)
                 LongPress.Category.LINK -> view?.showLinkLongPressDialog(longPress)
-                LongPress.Category.UNKNOWN -> Unit // Do nothing
+                LongPress.Category.UNKNOWN -> Unit
             }
         }
     }
 
-    /**
-     * Call when the user selects an option from the close browser menu that can be invoked by long
-     * pressing on individual tabs.
-     */
     fun onCloseBrowserEvent(id: Int, closeTabEvent: BrowserContract.CloseTabEvent) {
         when (closeTabEvent) {
             BrowserContract.CloseTabEvent.CLOSE_CURRENT ->
                 onTabClose(tabListState.tabIndexForId(id))
-
             BrowserContract.CloseTabEvent.CLOSE_OTHERS -> browserCoroutineScope.launch {
                 val currentTabId = currentTab?.id
                 model.tabsList.filter { it.id != id }.forEach {
@@ -1213,7 +1048,6 @@ class BrowserPresenter @Inject constructor(
                     }
                 }
             }
-
             BrowserContract.CloseTabEvent.CLOSE_ALL -> browserCoroutineScope.launch {
                 model.deleteAllTabs()
                 navigator.closeBrowser()
@@ -1221,10 +1055,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user long presses on a link within the web page and selects what they want to
-     * do with that link.
-     */
     fun onLinkLongPressEvent(
         longPress: LongPress,
         linkLongPressEvent: BrowserContract.LinkLongPressEvent
@@ -1237,7 +1067,6 @@ class BrowserPresenter @Inject constructor(
                         shouldSelect = true
                     )
                 }
-
             BrowserContract.LinkLongPressEvent.BACKGROUND_TAB ->
                 longPress.targetUrl?.let {
                     createNewTabAndSelect(
@@ -1245,20 +1074,14 @@ class BrowserPresenter @Inject constructor(
                         shouldSelect = false
                     )
                 }
-
             BrowserContract.LinkLongPressEvent.INCOGNITO_TAB -> longPress.targetUrl?.let(navigator::launchIncognito)
             BrowserContract.LinkLongPressEvent.SHARE ->
                 longPress.targetUrl?.let { navigator.sharePage(url = it, title = null) }
-
             BrowserContract.LinkLongPressEvent.COPY_LINK ->
                 longPress.targetUrl?.let(navigator::copyPageLink)
         }
     }
 
-    /**
-     * Call when the user long presses on an image within the web page and selects what they want to
-     * do with that image.
-     */
     fun onImageLongPressEvent(
         longPress: LongPress,
         imageLongPressEvent: BrowserContract.ImageLongPressEvent
@@ -1271,7 +1094,6 @@ class BrowserPresenter @Inject constructor(
                         shouldSelect = true
                     )
                 }
-
             BrowserContract.ImageLongPressEvent.BACKGROUND_TAB ->
                 longPress.targetUrl?.let {
                     createNewTabAndSelect(
@@ -1279,14 +1101,11 @@ class BrowserPresenter @Inject constructor(
                         shouldSelect = false
                     )
                 }
-
             BrowserContract.ImageLongPressEvent.INCOGNITO_TAB -> longPress.targetUrl?.let(navigator::launchIncognito)
             BrowserContract.ImageLongPressEvent.SHARE ->
                 longPress.targetUrl?.let { navigator.sharePage(url = it, title = null) }
-
             BrowserContract.ImageLongPressEvent.COPY_LINK ->
                 longPress.targetUrl?.let(navigator::copyPageLink)
-
             BrowserContract.ImageLongPressEvent.DOWNLOAD -> navigator.download(
                 PendingDownload(
                     url = longPress.targetUrl.orEmpty(),
@@ -1299,9 +1118,6 @@ class BrowserPresenter @Inject constructor(
         }
     }
 
-    /**
-     * Call when the user has selected a file from the file chooser to upload.
-     */
     fun onFileChooserResult(activityResult: ActivityResult) {
         currentTab?.handleFileChooserResult(activityResult)
     }
