@@ -1,8 +1,5 @@
 package acr.browser.lightning.browser
 
-import android.app.Activity
-import android.content.Intent
-import android.widget.Toast
 import acr.browser.lightning.adblock.allowlist.AllowListModel
 import acr.browser.lightning.browser.data.CookieAdministrator
 import acr.browser.lightning.browser.di.Browser2Scope
@@ -40,11 +37,6 @@ import acr.browser.lightning.html.bookmark.BookmarkPageFactory
 import acr.browser.lightning.html.history.HistoryPageFactory
 import acr.browser.lightning.search.SearchEngineProvider
 import acr.browser.lightning.ssl.SslState
-import acr.browser.lightning.ui.ContactActivity
-import acr.browser.lightning.ui.FeedbackActivity
-import acr.browser.lightning.ui.PrivacyActivity
-import acr.browser.lightning.ui.SupportActivity
-import acr.browser.lightning.ui.TermsActivity
 import acr.browser.lightning.utils.Option
 import acr.browser.lightning.utils.QUERY_PLACE_HOLDER
 import acr.browser.lightning.utils.isBookmarkUrl
@@ -400,33 +392,11 @@ class BrowserPresenter @Inject constructor(
             MenuSelection.BACK -> onBackClick()
             MenuSelection.FORWARD -> onForwardClick()
 
-            // Custom Nexus Browser screens
-            MenuSelection.PRIVACY_POLICY -> {
-                (view as? Activity)?.let {
-                    Toast.makeText(it, "Opening Privacy Policy", Toast.LENGTH_SHORT).show()
-                    it.startActivity(Intent(it, PrivacyActivity::class.java))
-                }
-            }
-            MenuSelection.TERMS_OF_SERVICE -> {
-                (view as? Activity)?.let {
-                    it.startActivity(Intent(it, TermsActivity::class.java))
-                }
-            }
-            MenuSelection.CONTACT_US -> {
-                (view as? Activity)?.let {
-                    it.startActivity(Intent(it, ContactActivity::class.java))
-                }
-            }
-            MenuSelection.SUPPORT -> {
-                (view as? Activity)?.let {
-                    it.startActivity(Intent(it, SupportActivity::class.java))
-                }
-            }
-            MenuSelection.FEEDBACK -> {
-                (view as? Activity)?.let {
-                    it.startActivity(Intent(it, FeedbackActivity::class.java))
-                }
-            }
+            MenuSelection.PRIVACY_POLICY -> navigator.openPrivacyPolicy()
+            MenuSelection.TERMS_OF_SERVICE -> navigator.openTermsOfService()
+            MenuSelection.CONTACT_US -> navigator.openContactUs()
+            MenuSelection.SUPPORT -> navigator.openSupport()
+            MenuSelection.FEEDBACK -> navigator.openFeedback()
         }
     }
 

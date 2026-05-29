@@ -11,6 +11,11 @@ import acr.browser.lightning.extensions.copyToClipboard
 import acr.browser.lightning.extensions.snackbar
 import acr.browser.lightning.log.Logger
 import acr.browser.lightning.settings.activity.SettingsActivity
+import acr.browser.lightning.ui.ContactActivity
+import acr.browser.lightning.ui.FeedbackActivity
+import acr.browser.lightning.ui.PrivacyActivity
+import acr.browser.lightning.ui.SupportActivity
+import acr.browser.lightning.ui.TermsActivity
 import acr.browser.lightning.utils.IntentUtils
 import acr.browser.lightning.utils.Utils
 import android.app.ActivityManager
@@ -90,6 +95,26 @@ class BrowserNavigator @Inject constructor(
 
     override fun launchIncognito(url: String?) {
         IncognitoBrowserActivity.launch(activity, url)
+    }
+
+    override fun openPrivacyPolicy() {
+        activity.startActivity(Intent(activity, PrivacyActivity::class.java))
+    }
+
+    override fun openTermsOfService() {
+        activity.startActivity(Intent(activity, TermsActivity::class.java))
+    }
+
+    override fun openContactUs() {
+        activity.startActivity(Intent(activity, ContactActivity::class.java))
+    }
+
+    override fun openSupport() {
+        activity.startActivity(Intent(activity, SupportActivity::class.java))
+    }
+
+    override fun openFeedback() {
+        activity.startActivity(Intent(activity, FeedbackActivity::class.java))
     }
 
     companion object {

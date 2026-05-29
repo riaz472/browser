@@ -68,5 +68,20 @@
     <item
         android:id="@+id/action_settings"
         android:title="@string/settings"/>
+    <item
+        android:id="@+id/nav_privacy"
+        android:title="Privacy Policy" />
+    <item
+        android:id="@+id/nav_terms"
+        android:title="Terms of Service" />
+    <item
+        android:id="@+id/nav_contact"
+        android:title="Contact Us" />
+    <item
+        android:id="@+id/nav_support"
+        android:title="Support" />
+    <item
+        android:id="@+id/nav_feedback"
+        android:title="Feedback" />
 
 </menu>

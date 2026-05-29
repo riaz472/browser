@@ -281,6 +281,31 @@ interface BrowserContract {
          * launch the incognito browser and load the provided [url].
          */
         fun launchIncognito(url: String?)
+
+        /**
+         * Open the Privacy Policy screen.
+         */
+        fun openPrivacyPolicy()
+
+        /**
+         * Open the Terms of Service screen.
+         */
+        fun openTermsOfService()
+
+        /**
+         * Open the Contact Us screen.
+         */
+        fun openContactUs()
+
+        /**
+         * Open the Support screen.
+         */
+        fun openSupport()
+
+        /**
+         * Open the Feedback screen.
+         */
+        fun openFeedback()
     }
 
     /**
