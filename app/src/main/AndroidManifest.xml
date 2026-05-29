@@ -171,7 +171,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
+        <activity android:name="acr.browser.lightning.ui.PrivacyActivity" />
+        <activity android:name="acr.browser.lightning.ui.TermsActivity" />
+        <activity android:name="acr.browser.lightning.ui.ContactActivity" />
+        <activity android:name="acr.browser.lightning.ui.SupportActivity" />
+        <activity android:name="acr.browser.lightning.ui.FeedbackActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
