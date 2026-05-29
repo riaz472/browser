@@ -397,6 +397,7 @@ class BrowserPresenter @Inject constructor(
             MenuSelection.CONTACT_US -> navigator.openContactUs()
             MenuSelection.SUPPORT -> navigator.openSupport()
             MenuSelection.FEEDBACK -> navigator.openFeedback()
+            MenuSelection.TOGGLE_DESKTOP_AGENT -> onToggleDesktopAgent()
         }
     }
 

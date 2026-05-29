@@ -21,5 +21,6 @@ enum class MenuSelection {
     TERMS_OF_SERVICE,
     CONTACT_US,
     SUPPORT,
-    FEEDBACK
+    FEEDBACK,
+    TOGGLE_DESKTOP_AGENT
 }

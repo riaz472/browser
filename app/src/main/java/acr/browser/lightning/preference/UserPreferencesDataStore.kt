@@ -308,6 +308,16 @@ class UserPreferencesDataStore @Inject constructor(
     )
 
     /**
+     * True if the browser should request the desktop version of websites by default,
+     * false otherwise. This setting is applied per new tab via the menu toggle.
+     */
+    val useDesktopUserAgent: NonNullPreferenceStore<Boolean> = NonNullPreferenceStore(
+        key = booleanPreferencesKey(USE_DESKTOP_USER_AGENT),
+        dataStore = dataStore,
+        defaultValue = false
+    )
+
+    /**
      * True if the browser should clear the navigation history on app exit, false otherwise.
      */
     val clearHistoryExitEnabled: NonNullPreferenceStore<Boolean> = NonNullPreferenceStore(
@@ -537,3 +547,4 @@ private const val SEARCH_SUGGESTIONS = "searchSuggestionsChoice"
 private const val HOSTS_SOURCE = "hostsSource"
 private const val HOSTS_LOCAL_FILE = "hostsLocalFile"
 private const val HOSTS_REMOTE_FILE = "hostsRemoteFile"
+private const val USE_DESKTOP_USER_AGENT = "useDesktopUserAgent"

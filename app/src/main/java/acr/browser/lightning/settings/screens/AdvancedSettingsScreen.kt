@@ -142,6 +142,15 @@ class AdvancedSettingsScreen @Inject constructor(
                         }
                     }
                 )
+            ),
+            ToggleState(
+                title = resourceProvider.stringResource(R.string.pref_desktop_mode),
+                summary = { resourceProvider.stringResource(R.string.pref_desktop_mode_summary) },
+                isChecked = { userPreferencesDataStore.useDesktopUserAgent.get() },
+                onToggle = {
+                    userPreferencesDataStore.useDesktopUserAgent.set(it)
+                    null
+                }
             )
         )
     )

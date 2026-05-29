@@ -50,19 +50,29 @@
         android:id="@+id/action_settings"
         android:title="@string/settings"/>
     <item
+        android:id="@+id/action_desktop_mode"
+        android:title="@string/action_desktop_mode"
+        android:icon="@drawable/ic_action_desktop"
+        android:checkable="true"/>
+    <item
         android:id="@+id/nav_privacy"
-        android:title="Privacy Policy" />
+        android:title="Privacy Policy"
+        android:icon="@drawable/ic_privacy"/>
     <item
         android:id="@+id/nav_terms"
-        android:title="Terms of Service" />
+        android:title="Terms of Service"
+        android:icon="@drawable/ic_terms"/>
     <item
         android:id="@+id/nav_contact"
-        android:title="Contact Us" />
+        android:title="Contact Us"
+        android:icon="@drawable/ic_contact"/>
     <item
         android:id="@+id/nav_support"
-        android:title="Support" />
+        android:title="Support"
+        android:icon="@drawable/ic_support"/>
     <item
         android:id="@+id/nav_feedback"
-        android:title="Feedback" />
+        android:title="Feedback"
+        android:icon="@drawable/ic_feedback"/>
 
 </menu>
