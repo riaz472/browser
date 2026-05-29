@@ -171,11 +171,26 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name="acr.browser.lightning.ui.PrivacyActivity" />
-        <activity android:name="acr.browser.lightning.ui.TermsActivity" />
-        <activity android:name="acr.browser.lightning.ui.ContactActivity" />
-        <activity android:name="acr.browser.lightning.ui.SupportActivity" />
-        <activity android:name="acr.browser.lightning.ui.FeedbackActivity" />
+        <activity
+            android:name="acr.browser.lightning.ui.PrivacyActivity"
+            android:theme="@style/Theme.LightTheme"
+            android:parentActivityName="acr.browser.lightning.DefaultBrowserActivity" />
+        <activity
+            android:name="acr.browser.lightning.ui.TermsActivity"
+            android:theme="@style/Theme.LightTheme"
+            android:parentActivityName="acr.browser.lightning.DefaultBrowserActivity" />
+        <activity
+            android:name="acr.browser.lightning.ui.ContactActivity"
+            android:theme="@style/Theme.LightTheme"
+            android:parentActivityName="acr.browser.lightning.DefaultBrowserActivity" />
+        <activity
+            android:name="acr.browser.lightning.ui.SupportActivity"
+            android:theme="@style/Theme.LightTheme"
+            android:parentActivityName="acr.browser.lightning.DefaultBrowserActivity" />
+        <activity
+            android:name="acr.browser.lightning.ui.FeedbackActivity"
+            android:theme="@style/Theme.LightTheme"
+            android:parentActivityName="acr.browser.lightning.DefaultBrowserActivity" />
         <activity android:name="acr.browser.lightning.ui.ReadingModeActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
