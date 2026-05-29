@@ -31,5 +31,5 @@ jobs:
         with:
           name: nexus-browser-debug
           path: |
-            app/build/outputs/apk/lightningPlus/debug/*.apk
             app/build/outputs/apk/*/debug/*.apk
+            app/build/outputs/apk/*/*/debug/*.apk
