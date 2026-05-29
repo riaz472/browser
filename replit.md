@@ -40,6 +40,12 @@ Use the **Build** workflow or run from the Shell:
 - JSoup (HTML parsing)
 - Mezzanine (file embedding at compile time)
 
+## Developer Contact
+
+- **Developer:** Riaz Ali Shahani
+- **Email:** riazalishahani485@gmail.com
+- **WhatsApp:** +923301458939
+
 ## User Preferences
 
 <!-- Add any user preferences or conventions here -->

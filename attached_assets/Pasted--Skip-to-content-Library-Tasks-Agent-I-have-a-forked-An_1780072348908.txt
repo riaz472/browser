@@ -1,0 +1,47 @@
+
+Skip to content
+Library
+Tasks
+Agent
+I have a forked Android project of Lightning Browser (renamed to Nexus Browser). The browser works fine, but when I click on the menu items "Privacy Policy", "Terms of Service", "Contact Us", "Support", "Feedback", the app crashes immediately. Reading Mode and Desktop Mode (which I added earlier) work correctly.
+
+I need you to FIX these 5 menu items so they open their respective activities without crashing.
+
+Root cause (likely):
+Activities are not properly registered in AndroidManifest.xml
+Activity classes have wrong package name or are missing
+Layout files for these activities are missing or have errors
+The BrowserPresenter or BrowserNavigator may be using wrong intent syntax
+Files to check and fix:
+1. AndroidManifest.xml
+Ensure these 5 lines are inside <application> tag:
+
+<activity android:name="acr.browser.lightning.ui.PrivacyActivity" />
+<activity android:name="acr.browser.lightning.ui.TermsActivity" />
+<activity android:name="acr.browser.lightning.ui.ContactActivity" />
+<activity android:name="acr.browser.lightning.ui.SupportActivity" />
+<activity android:name="acr.browser.lightning.ui.FeedbackActivity" />
+2 minutes ago
+Let me explore the relevant files to understand the current state:
+
+Let me read all the relevant files in parallel:
+
+The manifest and activity classes look correct. The crash must be from missing layout XML files. Let me check:
+
+All layout files exist too. Let me read them all to check for XML errors, and also check how these activities are launched:
+
+Everything looks correct so far — manifest, activity classes, layouts, and navigator. The crash must be in the contract interface or the presenter. Let me check those:
+
+The full chain looks fine. The crash must be a theme issue — the 5 activities have no android:theme in the manifest but extend AppCompatActivity, which requires an AppCompat theme. Let me verify by checking styles and ReadingModeActivity:
+
+Found it. ReadingModeActivity extends ComponentActivity (works with any theme), but the 5 crashing activities extend AppCompatActivity, which requires a Theme.AppCompat-derived theme. The <application> tag has no android:theme, so activities without an explicit theme get the bare system theme — causing the classic IllegalStateException: You need to use a Theme.AppCompat theme crash.
+
+The fix is adding android:theme="@style/Theme.LightTheme" to each of the 5 activity entries in the manifest:
+
+Now let me also add the onOptionsItemSelected handler to each activity so the back arrow in the action bar actually works (without it the up button is a no-op):
+
+
+Make, test, iterate…
+Agent
+Agent can make changes, review its work, and debug itself automatically.
+Loading... - Replit
