@@ -2,6 +2,11 @@ package acr.browser.lightning.browser
 
 import android.app.Activity
 import android.content.Intent
+import acr.browser.lightning.ui.PrivacyActivity
+import acr.browser.lightning.ui.TermsActivity
+import acr.browser.lightning.ui.ContactActivity
+import acr.browser.lightning.ui.SupportActivity
+import acr.browser.lightning.ui.FeedbackActivity
 import acr.browser.lightning.adblock.allowlist.AllowListModel
 import acr.browser.lightning.browser.data.CookieAdministrator
 import acr.browser.lightning.browser.di.Browser2Scope
