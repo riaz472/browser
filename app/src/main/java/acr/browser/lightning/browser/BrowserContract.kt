@@ -306,6 +306,11 @@ interface BrowserContract {
          * Open the Feedback screen.
          */
         fun openFeedback()
+
+        /**
+         * Open the Reading Mode screen for the given [url] and [title].
+         */
+        fun openReadingMode(url: String, title: String)
     }
 
     /**

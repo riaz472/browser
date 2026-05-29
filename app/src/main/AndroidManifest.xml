@@ -176,6 +176,7 @@
         <activity android:name="acr.browser.lightning.ui.ContactActivity" />
         <activity android:name="acr.browser.lightning.ui.SupportActivity" />
         <activity android:name="acr.browser.lightning.ui.FeedbackActivity" />
+        <activity android:name="acr.browser.lightning.ui.ReadingModeActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

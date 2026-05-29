@@ -35,6 +35,7 @@ class MenuItemAdapter @Inject constructor() {
             R.id.nav_support -> MenuSelection.SUPPORT
             R.id.nav_feedback -> MenuSelection.FEEDBACK
             R.id.action_desktop_mode -> MenuSelection.TOGGLE_DESKTOP_AGENT
+            R.id.action_reading_mode -> MenuSelection.READING_MODE
             else -> null
         }
     }

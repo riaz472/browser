@@ -20,6 +20,10 @@
         android:id="@+id/action_bookmarks"
         android:title="@string/action_bookmarks"/>
     <item
+        android:id="@+id/action_reading_mode"
+        android:title="@string/action_reading_mode"
+        android:icon="@drawable/ic_reading_mode"/>
+    <item
         android:id="@+id/action_desktop_mode"
         android:title="@string/action_desktop_mode"
         android:icon="@drawable/ic_action_desktop"

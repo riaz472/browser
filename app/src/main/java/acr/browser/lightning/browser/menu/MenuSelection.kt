@@ -22,5 +22,6 @@ enum class MenuSelection {
     CONTACT_US,
     SUPPORT,
     FEEDBACK,
-    TOGGLE_DESKTOP_AGENT
+    TOGGLE_DESKTOP_AGENT,
+    READING_MODE
 }

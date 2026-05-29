@@ -14,6 +14,7 @@ import acr.browser.lightning.settings.activity.SettingsActivity
 import acr.browser.lightning.ui.ContactActivity
 import acr.browser.lightning.ui.FeedbackActivity
 import acr.browser.lightning.ui.PrivacyActivity
+import acr.browser.lightning.ui.ReadingModeActivity
 import acr.browser.lightning.ui.SupportActivity
 import acr.browser.lightning.ui.TermsActivity
 import acr.browser.lightning.utils.IntentUtils
@@ -115,6 +116,10 @@ class BrowserNavigator @Inject constructor(
 
     override fun openFeedback() {
         activity.startActivity(Intent(activity, FeedbackActivity::class.java))
+    }
+
+    override fun openReadingMode(url: String, title: String) {
+        ReadingModeActivity.launch(activity, url, title)
     }
 
     companion object {

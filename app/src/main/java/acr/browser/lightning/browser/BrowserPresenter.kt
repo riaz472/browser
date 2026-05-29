@@ -398,6 +398,9 @@ class BrowserPresenter @Inject constructor(
             MenuSelection.SUPPORT -> navigator.openSupport()
             MenuSelection.FEEDBACK -> navigator.openFeedback()
             MenuSelection.TOGGLE_DESKTOP_AGENT -> onToggleDesktopAgent()
+            MenuSelection.READING_MODE -> currentTab?.url
+                ?.takeIf { !it.isSpecialUrl() }
+                ?.let { navigator.openReadingMode(it, currentTab?.title ?: "") }
         }
     }
 
