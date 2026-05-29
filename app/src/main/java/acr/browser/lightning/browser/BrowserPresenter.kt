@@ -2,11 +2,7 @@ package acr.browser.lightning.browser
 
 import android.app.Activity
 import android.content.Intent
-import acr.browser.lightning.ui.PrivacyActivity
-import acr.browser.lightning.ui.TermsActivity
-import acr.browser.lightning.ui.ContactActivity
-import acr.browser.lightning.ui.SupportActivity
-import acr.browser.lightning.ui.FeedbackActivity
+import android.widget.Toast
 import acr.browser.lightning.adblock.allowlist.AllowListModel
 import acr.browser.lightning.browser.data.CookieAdministrator
 import acr.browser.lightning.browser.di.Browser2Scope
@@ -71,12 +67,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
-/**
- * The monolithic (oops) presenter that governs the behavior of the browser UI and interactions by
- * the user for both default and incognito browsers. This presenter should live for the entire
- * duration of the browser activity, which itself should not be recreated during configuration
- * changes.
- */
 @Browser2Scope
 class BrowserPresenter @Inject constructor(
     private val model: BrowserContract.Model,
@@ -413,32 +403,28 @@ class BrowserPresenter @Inject constructor(
             // Custom Nexus Browser screens
             MenuSelection.PRIVACY_POLICY -> {
                 (view as? Activity)?.let {
-                    val intent = Intent(it, PrivacyActivity::class.java)
-                    it.startActivity(intent)
+                    Toast.makeText(it, "Opening Privacy Policy", Toast.LENGTH_SHORT).show()
+                    it.startActivity(Intent(it, PrivacyActivity::class.java))
                 }
             }
             MenuSelection.TERMS_OF_SERVICE -> {
                 (view as? Activity)?.let {
-                    val intent = Intent(it, TermsActivity::class.java)
-                    it.startActivity(intent)
+                    it.startActivity(Intent(it, TermsActivity::class.java))
                 }
             }
             MenuSelection.CONTACT_US -> {
                 (view as? Activity)?.let {
-                    val intent = Intent(it, ContactActivity::class.java)
-                    it.startActivity(intent)
+                    it.startActivity(Intent(it, ContactActivity::class.java))
                 }
             }
             MenuSelection.SUPPORT -> {
                 (view as? Activity)?.let {
-                    val intent = Intent(it, SupportActivity::class.java)
-                    it.startActivity(intent)
+                    it.startActivity(Intent(it, SupportActivity::class.java))
                 }
             }
             MenuSelection.FEEDBACK -> {
                 (view as? Activity)?.let {
-                    val intent = Intent(it, FeedbackActivity::class.java)
-                    it.startActivity(intent)
+                    it.startActivity(Intent(it, FeedbackActivity::class.java))
                 }
             }
         }
