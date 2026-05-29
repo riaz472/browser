@@ -1,4 +1,4 @@
-name: Build Nexus Browser (Debug – Working)
+name: Build Nexus Browser (Debug with Upload)
 
 on:
   push:
