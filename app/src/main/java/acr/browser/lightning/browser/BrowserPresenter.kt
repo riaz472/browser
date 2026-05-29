@@ -1,5 +1,7 @@
 package acr.browser.lightning.browser
 
+import android.app.Activity
+import android.content.Intent
 import acr.browser.lightning.adblock.allowlist.AllowListModel
 import acr.browser.lightning.browser.data.CookieAdministrator
 import acr.browser.lightning.browser.di.Browser2Scope
@@ -49,7 +51,6 @@ import acr.browser.lightning.utils.isDownloadsUrl
 import acr.browser.lightning.utils.isHistoryUrl
 import acr.browser.lightning.utils.isSpecialUrl
 import acr.browser.lightning.utils.smartUrlFilter
-import android.content.Intent
 import androidx.activity.result.ActivityResult
 import androidx.core.net.toUri
 import kotlinx.coroutines.CoroutineScope
@@ -393,53 +394,45 @@ class BrowserPresenter @Inject constructor(
             MenuSelection.SHARE -> currentTab?.url?.takeIf { !it.isSpecialUrl() }?.let {
                 navigator.sharePage(url = it, title = currentTab?.title)
             }
-            MenuSelection.HISTORY -> createNewTabAndSelect(
-                historyPageInitializer,
-                shouldSelect = true
-            )
-            MenuSelection.DOWNLOADS -> createNewTabAndSelect(
-                downloadPageInitializer,
-                shouldSelect = true
-            )
+            MenuSelection.HISTORY -> createNewTabAndSelect(historyPageInitializer, shouldSelect = true)
+            MenuSelection.DOWNLOADS -> createNewTabAndSelect(downloadPageInitializer, shouldSelect = true)
             MenuSelection.FIND -> view?.showFindInPageDialog()
-            MenuSelection.COPY_LINK -> currentTab?.url?.takeIf { !it.isSpecialUrl() }
-                ?.let(navigator::copyPageLink)
-            MenuSelection.ADD_TO_HOME -> currentTab?.url?.takeIf { !it.isSpecialUrl() }
-                ?.let { addToHomeScreen() }
+            MenuSelection.COPY_LINK -> currentTab?.url?.takeIf { !it.isSpecialUrl() }?.let(navigator::copyPageLink)
+            MenuSelection.ADD_TO_HOME -> currentTab?.url?.takeIf { !it.isSpecialUrl() }?.let { addToHomeScreen() }
             MenuSelection.BOOKMARKS -> view?.openBookmarkDrawer()
-            MenuSelection.ADD_BOOKMARK -> currentTab?.url?.takeIf { !it.isSpecialUrl() }
-                ?.let { showAddBookmarkDialog() }
+            MenuSelection.ADD_BOOKMARK -> currentTab?.url?.takeIf { !it.isSpecialUrl() }?.let { showAddBookmarkDialog() }
             MenuSelection.SETTINGS -> navigator.openSettings()
             MenuSelection.BACK -> onBackClick()
             MenuSelection.FORWARD -> onForwardClick()
-            // === NEXUS BROWSER CUSTOM SCREENS ===
+
+            // Custom Nexus Browser screens
             MenuSelection.PRIVACY_POLICY -> {
-                view?.let {
-                    val intent = Intent(it.getContext(), PrivacyActivity::class.java)
+                (view as? Activity)?.let {
+                    val intent = Intent(it, PrivacyActivity::class.java)
                     it.startActivity(intent)
                 }
             }
             MenuSelection.TERMS_OF_SERVICE -> {
-                view?.let {
-                    val intent = Intent(it.getContext(), TermsActivity::class.java)
+                (view as? Activity)?.let {
+                    val intent = Intent(it, TermsActivity::class.java)
                     it.startActivity(intent)
                 }
             }
             MenuSelection.CONTACT_US -> {
-                view?.let {
-                    val intent = Intent(it.getContext(), ContactActivity::class.java)
+                (view as? Activity)?.let {
+                    val intent = Intent(it, ContactActivity::class.java)
                     it.startActivity(intent)
                 }
             }
             MenuSelection.SUPPORT -> {
-                view?.let {
-                    val intent = Intent(it.getContext(), SupportActivity::class.java)
+                (view as? Activity)?.let {
+                    val intent = Intent(it, SupportActivity::class.java)
                     it.startActivity(intent)
                 }
             }
             MenuSelection.FEEDBACK -> {
-                view?.let {
-                    val intent = Intent(it.getContext(), FeedbackActivity::class.java)
+                (view as? Activity)?.let {
+                    val intent = Intent(it, FeedbackActivity::class.java)
                     it.startActivity(intent)
                 }
             }
