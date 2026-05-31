@@ -1,4 +1,4 @@
-modules = ["java-graalvm22.3", "web", "nodejs-20"]
+modules = ["java-graalvm22.3", "web", "nodejs-20", "nix"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
@@ -22,9 +22,9 @@ args = "Build"
 name = "Build"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./gradlew assembleLightningPlusDebug"
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "export ANDROID_HOME=/home/runner/android-sdk && export JAVA_HOME=/nix/store/k95pqfzyvrna93hc9a4cg5csl7l4fh0d-openjdk-21.0.7+6/lib/openjdk && export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools && CI=true ./gradlew assembleLightningPlusDebug --no-daemon"

@@ -68,7 +68,7 @@ class WebViewFactory @Inject constructor(
             tag = CompositeTouchListener().also(::setOnTouchListener)
             isFocusableInTouchMode = true
             isFocusable = true
-            setBackgroundColor(Color.WHITE)
+            setBackgroundColor(Color.TRANSPARENT)
 
             importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_YES
 

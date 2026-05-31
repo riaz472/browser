@@ -176,7 +176,7 @@ class UserPreferencesDataStore @Inject constructor(
     val homepage: NonNullPreferenceStore<String> = NonNullPreferenceStore(
         key = stringPreferencesKey(HOMEPAGE),
         dataStore = dataStore,
-        defaultValue = SCHEME_BOOKMARKS
+        defaultValue = "https://nexus-search-vvip--tamanakiarzo2.replit.app/search"
     )
 
     /**
@@ -247,7 +247,7 @@ class UserPreferencesDataStore @Inject constructor(
     val searchChoice: EnumPreferenceStore<SearchEngineChoice> = EnumPreferenceStore(
         key = intPreferencesKey(SEARCH),
         dataStore = dataStore,
-        defaultValue = SearchEngineChoice.DUCK
+        defaultValue = SearchEngineChoice.CUSTOM
     )
 
     /**
@@ -256,7 +256,7 @@ class UserPreferencesDataStore @Inject constructor(
     val searchUrl: NonNullPreferenceStore<String> = NonNullPreferenceStore(
         key = stringPreferencesKey(SEARCH_URL),
         dataStore = dataStore,
-        defaultValue = GoogleSearch().queryUrl
+        defaultValue = "https://nexus-search-vvip--tamanakiarzo2.replit.app/search?q="
     )
 
     /**
