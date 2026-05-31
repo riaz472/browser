@@ -32,4 +32,4 @@ jobs:
           name: nexus-browser-debug
           path: |
             app/build/outputs/apk/*/debug/*.apk
-            app/build/outputs/apk/*/*/debug/*.apk
+            app/build/outputs/apk/*/*/0debug/*.apk
