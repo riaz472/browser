@@ -418,4 +418,12 @@
             </LinearLayout>
         </LinearLayout>
     </androidx.drawerlayout.widget.DrawerLayout>
+
+    <include
+        layout="@layout/floating_nav_overlay"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="48dp" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

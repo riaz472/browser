@@ -85,6 +85,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import android.view.GestureDetector
+import android.view.MotionEvent
+import kotlin.math.abs
 import javax.inject.Inject
 
 /**
@@ -109,6 +112,26 @@ abstract class BrowserActivity : ThemableBrowserActivity() {
     private var customView: View? = null
 
     private var pendingScroll = -1
+
+    private var floatingNavOverlay: View? = null
+    private var btnNavBack: View? = null
+    private var btnNavForward: View? = null
+    private val hideNavOverlayRunnable = Runnable { hideFloatingNav() }
+    private val navGestureDetector by lazy {
+        GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onFling(
+                e1: MotionEvent?,
+                e2: MotionEvent,
+                velocityX: Float,
+                velocityY: Float
+            ): Boolean {
+                if (abs(velocityX) > abs(velocityY) && abs(velocityX) > 400f) {
+                    showFloatingNav()
+                }
+                return false
+            }
+        })
+    }
 
     @Suppress("ConvertLambdaToReference")
     private val launcher = registerForActivityResult(
@@ -353,6 +376,14 @@ abstract class BrowserActivity : ThemableBrowserActivity() {
         binding.homeButton.setOnClickListener { presenter.onTabCountViewClick() }
         binding.actionBack.setOnClickListener { presenter.onBackClick() }
         binding.actionForward.setOnClickListener { presenter.onForwardClick() }
+
+        floatingNavOverlay = binding.root.findViewById(R.id.floating_nav_overlay)
+        btnNavBack = binding.root.findViewById<View>(R.id.btn_nav_back).also {
+            it.setOnClickListener { presenter.onBackClick(); showFloatingNav() }
+        }
+        btnNavForward = binding.root.findViewById<View>(R.id.btn_nav_forward).also {
+            it.setOnClickListener { presenter.onForwardClick(); showFloatingNav() }
+        }
         binding.actionHome.setOnClickListener { presenter.onHomeClick() }
         binding.newTabButton.setOnClickListener { presenter.onNewTabClick() }
         binding.newTabButton.setOnLongClickListener {
@@ -412,12 +443,38 @@ abstract class BrowserActivity : ThemableBrowserActivity() {
             ?: super.onKeyUp(keyCode, event)
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        navGestureDetector.onTouchEvent(ev)
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun showFloatingNav() {
+        val overlay = floatingNavOverlay ?: return
+        overlay.removeCallbacks(hideNavOverlayRunnable)
+        overlay.visibility = View.VISIBLE
+        overlay.animate().alpha(1f).setDuration(200).start()
+        overlay.postDelayed(hideNavOverlayRunnable, 3000)
+    }
+
+    private fun hideFloatingNav() {
+        val overlay = floatingNavOverlay ?: return
+        overlay.animate().alpha(0f).setDuration(300)
+            .withEndAction { overlay.visibility = View.INVISIBLE }
+            .start()
+    }
+
     /**
      * @see BrowserContract.View.renderState
      */
     fun renderState(viewState: PartialBrowserViewState) {
-        viewState.isBackEnabled?.let { binding.actionBack.isEnabled = it }
-        viewState.isForwardEnabled?.let { binding.actionForward.isEnabled = it }
+        viewState.isBackEnabled?.let {
+            binding.actionBack.isEnabled = it
+            btnNavBack?.alpha = if (it) 1f else 0.35f
+        }
+        viewState.isForwardEnabled?.let {
+            binding.actionForward.isEnabled = it
+            btnNavForward?.alpha = if (it) 1f else 0.35f
+        }
         viewState.displayUrl?.let(binding.search::setText)
         viewState.sslState?.let {
             binding.searchSslStatus.setImageDrawable(createSslDrawableForState(it))
