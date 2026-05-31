@@ -50,6 +50,11 @@ class UrlHandler @Inject constructor(
             return continueLoadingUrl(view, url, headers)
         }
 
+        if (URLUtil.isNetworkUrl(url)) {
+            // Always load http/https URLs in-app — never hand off to an external browser
+            return continueLoadingUrl(view, url, headers)
+        }
+
         return if (isMailOrIntent(url, view) || intentUtils.startActivityForUrl(view, url)) {
             // If it was a mailto: link, or an intent, or could be launched elsewhere, do that
             true

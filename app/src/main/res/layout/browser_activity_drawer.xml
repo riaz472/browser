@@ -25,7 +25,8 @@
                 android:background="?attr/colorPrimary"
                 android:clipChildren="false"
                 android:clipToPadding="false"
-                android:fitsSystemWindows="true">
+                android:fitsSystemWindows="true"
+                android:visibility="gone">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/desktop_tabs_list"

@@ -1,0 +1,31 @@
+Act as a Senior Android Native (Kotlin/Java) Developer and UX Specialist. I have imported my custom Android Web Browser project. 
+
+Our core goal is to remove all default multi-engine search selections, eliminate any redundant native search bars/boxes at the bottom or top, make my custom engine the absolute fullscreen homepage, and enforce native secure browsing.
+
+Please modify the source code, layouts, and fragments to implement the following changes:
+
+1. COMPLETELY REMOVE NATIVE SEARCH BOXES & ENGINE SELECTION:
+   - Identify the main layout XML files (e.g., 'activity_main.xml', fragments, or bottom bar sheets).
+   - Completely remove or set visibility to 'GONE' for the native bottom search box container, multi-engine toggles (Google, DuckDuckGo, Wikipedia options), and native search inputs.
+   - The native UI must not render any internal search boxes. The layout must be clean and minimal.
+
+2. SET FULLSCREEN DEFAULT HOMEPAGE ENGINE:
+   - Configure the core <WebView> component to occupy 100% of the screen height and width.
+   - Force the initial startup string configuration hook to immediately load my custom live engine instance as the absolute fullscreen landing page:
+     https://replit.app
+
+3. STRIP CHROMIUM DEPENDENCY / ENFORCE IN-APP BROWSING:
+   - Intercept all click actions on search results and URLs. Do NOT allow the Android OS to launch external system applications like Google Chrome or standard browsers.
+   - Inside the main Activity controller file, bind a strict custom 'WebViewClient' structure override to ensure all external sign-ups, form submissions, and browsing sessions are kept strictly inside our app:
+     
+     webView.webViewClient = object : WebViewClient() {
+         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+             view.loadUrl(request.url.toString())
+             return true
+         }
+     }
+
+4. TRANSPARENCY BINDING:
+   - Maintain the `webView.setBackgroundColor(Color.TRANSPARENT);` layer properties so our custom dark glassmorphic engine elements sync natively over the user's custom browser background layout asset.
+
+Please scan the Android framework resources, completely strip out the secondary search mechanics, map the execution flow directly to our live URL, and let me know once compiled successfully!
